@@ -1,12 +1,12 @@
 ## 理论密码学入门书籍Introduction to Modern Cryptography的学习笔记
 ### 第一部分：对称密码学
-[第二章 完美安全的加密方案](./Ch2 Perfect_Secret_Encryption.md)
+[第二章 完美安全的加密方案](Ch2-Perfect-Secret-Encryption.md)
 
 [第三章 私钥（对称）加密方案] 
 
-[第四章 消息认证编码](./Ch4 Message_Authentication_Code.pdf)
+[第四章 消息认证编码](Ch4-Message-Authentication-Code.pdf)
 
-[第五章 哈希函数及其应用](./Ch5 Hash_Functions_and_Application.md)
+[第五章 哈希函数及其应用](Ch5-Hash-Functions-and-Application.md)
 
 [第六章 对称密码学原语的实践构造] 
 
