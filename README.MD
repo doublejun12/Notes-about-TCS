@@ -22,3 +22,5 @@
 
 **My personal notes of Spectral Graph Theory (From the course [TCS Toolkits](https://www.diderot.one/courses/28) by Ryan O'Donnel)**
 
+[Lecture 1: The Quadratic Form and Standard Random Walk](Spectral-Graph-Theory/SGT-1/L1.pdf)
+

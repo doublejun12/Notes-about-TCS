@@ -1,0 +1,145 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref, amssymb, amsmath, graphicx, subfigure}
+
+\setlength{\oddsidemargin}{.25in}
+\setlength{\evensidemargin}{.25in}
+\setlength{\textwidth}{6in}
+\setlength{\topmargin}{-0.4in}
+\setlength{\textheight}{8.5in}
+
+\setlength{\parindent}{0in}
+\setlength{\parskip}{8pt}
+
+\newcommand{\heading}[6]{
+  \renewcommand{\thepage}{#1-\arabic{page}}
+  \noindent
+  \begin{center}
+  \framebox{
+    \vbox{
+      \hbox to 5.78in { \textbf{#2} \hfill #3 }
+      \vspace{4mm}
+      \hbox to 5.78in { {\Large \hfill #6  \hfill} }
+      \vspace{2mm}
+      \hbox to 5.78in { \textit{Instructor: #4 \hfill #5} }
+    }
+  }
+  \end{center}
+  \vspace*{4mm}
+}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{observation}[theorem]{Observation}
+\newtheorem{fact}[theorem]{Fact}
+\newtheorem{assumption}[theorem]{Assumption}
+
+\newenvironment{proof}{\noindent{\bf Proof:} \hspace*{1mm}}{
+	\hspace*{\fill} $\Box$ }
+\newenvironment{proof_of}[1]{\noindent {\bf Proof of #1:}
+	\hspace*{1mm}}{\hspace*{\fill} $\Box$ }
+\newenvironment{proof_claim}{\begin{quotation} \noindent}{
+	\hspace*{\fill} $\diamond$ \end{quotation}}
+	
+\newcommand{\lecture}[4]{\heading{#1}{Spectral Graph Theory}{#2}{Ryan O'Donnel}{Scribe: #4}{#3}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PLEASE MODIFY THESE FIELDS AS APPROPRIATE:
+\newcommand{\lecturenum}{1} % lecture number
+\newcommand{\lecturedate}{\today} % date of lecture (e.g., 'March 20, 2010')
+\newcommand{\lecturetitle}{The Quadratic Form and Standard Random Walk} % lecture title
+\newcommand{\scribename}{Shuangjun Zhang} % full name of scribe
+% PUT HERE ANY PACKAGES, MACROS, etc., ADDED BY YOU
+%
+\usepackage{graphicx}
+\usepackage{subfigure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\lecture{\lecturenum}{\lecturedate}{\lecturetitle}{\scribename}
+
+\section{The Labelling Function}
+
+We consider the undirected graph $G=\left(V, E\right) $ and it satisfies the following properties:
+\begin{itemize}
+  \item The graph is finite.
+  \item Multiple parallel edges and self-loops are allowed.
+  \item vertices of degree $0$ are not allowed.
+\end{itemize}
+For simplicity, maybe we assume $G$ is regular.
+
+\par We can label the vertice set $V$ by real numbers: 
+$$f: V \rightarrow \mathbb{R} \equiv\left[\begin{array}{c}
+  f\left(v_{1}\right) \\
+  f\left(v_{2}\right) \\
+  \vdots \\
+  f\left(v_{n}\right)
+  \end{array}\right]
+$$
+For example, $f$ can be temperature, voltage, coordinate or $0-1$ indicator of $S \subseteq V$.
+\par Remark that we can add or scalar multiply this function.
+$$\left( f+g \right)\left(x\right) = f\left(x\right) + g\left(x\right),$$
+$$c \cdot f \left(x\right) = f \left(c \cdot x\right). $$
+So, $\{f: V \rightarrow \mathbb{R}\}$ is a vector space with dimension $n = \left| V \right|.$
+
+\section{Key to SGT: The Quadratic Form}
+
+\begin{definition}
+  The quadratic form is defined to be
+  $$\mathcal{E}[f]:=\frac{1}{2} \underset{u \sim v}{\mathbb{E}}\left[(f(\boldsymbol{u})-f(\boldsymbol{v}))^{2}\right]$$
+  Where $u \sim v$ denotes we choose a uniform random edge $(u,v) \in E$.
+\end{definition}
+
+From the definition, we have some facts about the quadratic form.
+\begin{itemize}
+  \item $\mathcal{E}[f] \geq 0.$
+  \item $\mathcal{E}[c \cdot f] = c^2 \cdot \mathcal{E}[f].$
+  \item $\mathcal{E}[f + c] = \mathcal{E}[f].$
+\end{itemize}
+Intuitively, The quadratic form is small if and only if $f$'s value don't vary much along edges.
+\par For example, if we take $S \subseteq V$ and $f = 1_{S}$ (the indicator function):
+$$
+f(v)=\left\{
+  \begin{array}{ll}
+  1, & \text { if } v \in S \\
+  0, & \text { if } v \notin S
+  \end{array}
+  \right.
+$$
+Then we have:
+
+\begin{align*}
+  \mathcal{E}[f] &= \frac{1}{2} \cdot \underset{u \sim v}{\mathbb{E}}[(1_{s}(u) - 1_{s}(v))^2] \\
+  &= \frac{1}{2} \cdot \underset{u \sim v}{\mathbb{E}}[1_{\{(u,v) \text{ cross the cut } (S, \bar{S})\}}] \\
+  &= \frac{1}{2} \cdot \{\text{fraction of edges on } \partial S\} \\
+  &= \underset{u \sim v}{\text{Pr}} [ u \rightarrow v \text{ is stepping out of } S]
+\end{align*}
+
+\section{Standard Random Walk}
+Next, we define a distribution over $V$. To choose a random vertex
+\begin{itemize}
+  \item choose a uniform random edge $(u, v)$ (direct).
+  \item output $u$.
+\end{itemize}
+We denote this distribution by $\pi$.
+\begin{fact}
+  $\pi[u]$ is proportional to deg(u) and 
+  $$\pi(u) = \frac{\text{deg}(u)}{2|E|}.$$
+\end{fact}
+If $G$ is regular, $\pi$ is a uniform distribution on $V$.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% bibliography goes here
+\bibliographystyle{amsalpha}
+
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
