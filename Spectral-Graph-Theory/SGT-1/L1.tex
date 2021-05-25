@@ -136,8 +136,76 @@ We denote this distribution by $\pi$.
   $$\pi(u) = \frac{\text{deg}(u)}{2|E|}.$$
 \end{fact}
 If $G$ is regular, $\pi$ is a uniform distribution on $V$.
+\begin{fact}
+  If we draw a vertice $u \sim \pi$, and let $v$ be a uniform random neighbor of $u$, then the distribution of $(u, v)$ is identical to draw a uniform random edge $(u^{prime}, v^{prime})$, and $v$ is also distributed according to $\pi$.
+\end{fact}
+\begin{proof}
+  The probability of choosing a vertice $u$ is $\pi(u) = \frac{\text{deg}(u)}{2\left|E\right|}$. 
+  \begin{align*}
+    \text{Pr}\left[\text{pick the edge }(u,v)\right] &= \text{Pr}\left[\text{pick a random neighbor } v \text{ of } u \text{|pick a random vertice } u \right] \cdot \pi(u)\\
+    &= \frac{1}{\text{deg}(u)} \cdot \frac{\text{deg}(u)}{2|E|}\\
+    &= \frac{1}{2|E|}
+  \end{align*}
+  
+\end{proof}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{corollary}
+  Let $t \in \mathbb{N}$, draw a vertice $u \sim \pi$ and do standard random walk for $t$ steps, then $v$ is also distributed according to $\pi$.
+\end{corollary}
+We define $\pi$ as a invariant distribution. But now we have a new question, say $u_{0}$ is not distributed according to $\pi$, do a $t$ steps random walk from $u_{0}$, as $t \rightarrow \infty$, does the distribution of $v \rightarrow \pi$? The answer is not if $G$ is disconnected or $G$ is bipartite. Otherwise, the answer is \textbf{YES}.
+\par but how fast does it converge? We should consider the spectral of the graph. For example, let $S \subseteq V$, if the $cut(S, \bar{S})$ is tiny, then the convergence time may be very large, but we have showed in this case $\mathcal{E}[1_{S}]$ is small. Intuitively, converge fastly if and only if $\mathcal{E}[f]$ never small.
 
+\section{Enter Linear Algebra}
+Let $f:V \rightarrow \mathbb{R}$ and $u \sim \pi$, then $f(u)$ is a real random variable. We can define the mean and variance of this random variable.
+\begin{itemize}
+  \item Mean: $\mathbb{E}[f] := \underset{u \sim \pi}{\mathbb{E}} [f(u)]$. For example, if $S \subseteq V$, and $f = 1_s$, then $\mathbb{E}[f] = \underset{u \sim \pi}{\mathbb{E}} [1_s(u)] = \underset{u \sim \pi}{Pr}[u \in S]$. This is the "weight"/"volumn" of $S$.
+  \item Variance: $Var[f(u)] = \underset{u \sim \pi}{\mathbb{E}} [(f(u)-\mu)^2] = \underset{u \sim \pi}{\mathbb{E}} [f(u)^2] - \underset{u \sim \pi}{\mathbb{E}} [f(u)]^2 = \frac{1}{2} \underset{u \sim \pi, v \sim \pi}{\mathbb{E}} [(f(u)-f(v))^2]$. Recall that $\mathcal{E}[f]:=\frac{1}{2} \underset{u \sim v}{\mathbb{E}}\left[(f(\boldsymbol{u})-f(\boldsymbol{v}))^{2}\right]$.
+\end{itemize}
+We can define inner product between two functions.
+\begin{definition}
+  Let $f, g: V \rightarrow \mathbb{R}$, the inner product of $f, g$ is defines as $<f,g>_\pi := \underset{u \sim \pi}{\mathbb{E}[f(u)g(u)]}$
+\end{definition}
+Remark this is a vector space inner product.
+\begin{itemize}
+  \item $\left< f,g \right>_\pi = \left<g,f \right>_\pi$.
+  \item $\left< c \cdot f+g,h \right>_\pi = c \cdot \left< f,h \right>_\pi + \left<g,h \right>_\pi$.
+  \item $||f||_{2}^{2} = \left< f,f \right>_\pi = \underset{u \sim \pi}{\mathbb{E}}[f(u)^2] \geq 0$ and the equality holds if and only if $f \equiv 0$.
+\end{itemize}
+Let $S \subseteq V$, $f = 1_s$, then $||f||_1 := \underset{u \sim \pi}{\mathbb{E}}[|f(u)|] = \underset{u \sim \pi}{\mathbb{E}}[1_s(u)] = \underset{u \sim \pi}{Pr}[u \in S]$ = "volumn" of S. Notice that, $||f||_2^2 = \left<f,f \right> = \underset{u \sim \pi}{\mathbb{E}}[f(u)^2] = \underset{u \sim \pi}{\mathbb{E}}[|f(u)|] = ||f||_1$.
+
+\section{Minimizing and Maxmizing the Quardratic Form}
+Now we have a question, how small can $\mathcal{E}[f]$ be? The answer is $0$ if we take $f \equiv 0$. Is there a nontrival $f$ with $\mathcal{E}[f] = 0$? Again, recall the definition of the quadratic form $\mathcal{E}[f]:=\frac{1}{2} \underset{u \sim v}{\mathbb{E}}\left[(f(\boldsymbol{u})-f(\boldsymbol{v}))^{2}\right]$.
+
+\begin{proposition}
+  $\mathcal{E}[f] = 0$ if and only if $f$ is constant on each connected component of $G$ and the number of connected component of $G$ equals to the number of linear independent $f$ with $\mathcal{E}[f] = 0$.
+\end{proposition}
+If the components are $S_1, ..., S_l$, $1_{S_1}, 1_{S_2},...,1_{S_l}$ are linear independent, the subspace $\{f: \mathcal{E}[f]=0\} = \sum_{i=1}^{l} c_i \cdot 1_{S_i}$.
+\par Next, we maxmize $\mathcal{E}[f]$. But recall we have $\mathcal{E}[c \cdot f] = c^2 \cdot \mathcal{E}[f]$, so our task is maxmizing $\mathcal{E}[f]$ subject to $Var[f] = 1 (\leq 1)$. Remark this is identical to maxmize $\mathcal{E}[f]$ subject to $||f||_2^2 = \mathbb{E}[f^2] = 1 (\leq 1)$, since $\mathbb{E}[f^2] = Ver[f] + \mathbb{E}[f]^2$.
+\par Intuitively, the edge endpoints' value should be as far as possible. For what kind of $G$ will you be most successful? The answer is bipartite graph. If $G$ is bipartite, $V=(V_1, V_2)$, let $f=1_{V_1} - 1_{V_2}$:
+$$
+f(u)=\left\{
+  \begin{array}{ll}
+  +1, & \text { if } u \in V_1 \\
+  -1, & \text { if } u \in V_2
+  \end{array}
+  \right.
+$$
+Now, we have
+\begin{itemize}
+  \item $\underset{u \sim \pi}{\mathbb{E}}[f(u)^2] = \mathbb{E}[1] = 1$.
+  \item $\mathcal{E}[f] =\frac{1}{2} \underset{u \sim v}{\mathbb{E}}\left[(f(\boldsymbol{u})-f(\boldsymbol{v}))^{2}\right] = 2$.
+\end{itemize}
+\begin{proposition}
+  $\mathcal{E}[f] \leq 2 ||f||_2^2 = 2 \mathbb{E}[f^2]$.
+\end{proposition}
+\begin{proof}
+  \begin{align*}
+    \mathcal{E}[f] =\frac{1}{2} \underset{u \sim v}{\mathbb{E}}\left[(f(\boldsymbol{u})-f(\boldsymbol{v}))^{2}\right] &= \frac{1}{2} \underset{u \sim \pi}{\mathbb{E}}[f(u)^2] + \frac{1}{2} \underset{v \sim \pi}{\mathbb{E}}[f(v)^2] + \underset{u \sim v}{E} [f(u) \cdot f(v)]\\
+    & \leq \mathbb{E}[f^2] + \sqrt{\underset{u \sim v}{\mathbb{E}}[f(u)^2]} \cdot \sqrt{\underset{u \sim v}{\mathbb{E}}[f(v)^2]}\\
+    &= 2 \mathbb{E}[f^2]
+  \end{align*}
+\end{proof}
+\par \textbf{Exercise:} The equality $\mathcal{E}[f] = 2 \mathbb{E}[f^2]$ is possible if and only if $G$ is bipartite.
 % bibliography goes here
 \bibliographystyle{amsalpha}
 

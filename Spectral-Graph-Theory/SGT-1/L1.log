@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020/W32TeX) (preloaded format=xelatex 2020.8.13)  25 MAY 2021 01:05
+This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020/W32TeX) (preloaded format=xelatex 2020.8.13)  26 MAY 2021 02:07
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -295,24 +295,24 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 72.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
-]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 144.
- [2]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 144.
+] [2] [3]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 212.
+ [4]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 212.
  (./L1.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 144.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 144.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 212.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 212.
 Package rerunfilecheck Info: File `L1.out' has not changed.
-(rerunfilecheck)             Checksum: 3D80B697D2114A25FF24030C8B2105D6;204.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 144.
+(rerunfilecheck)             Checksum: 40C897BBD4C33622D96D33B9A235090D;359.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 212.
  ) 
 Here is how much of TeX's memory you used:
  9631 strings out of 479699
  135626 string characters out of 5892507
- 388098 words of memory out of 5000000
+ 390098 words of memory out of 5000000
  26747 multiletter control sequences out of 15000+600000
  571031 words of font info for 58 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 43i,13n,45p,337b,313s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 43i,13n,45p,471b,379s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on L1.pdf (2 pages).
+Output written on L1.pdf (4 pages).
