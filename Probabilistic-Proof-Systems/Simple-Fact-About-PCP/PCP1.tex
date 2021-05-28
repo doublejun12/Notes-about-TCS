@@ -1,0 +1,130 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref, amssymb, amsmath, graphicx, subfigure}
+
+\setlength{\oddsidemargin}{.25in}
+\setlength{\evensidemargin}{.25in}
+\setlength{\textwidth}{6in}
+\setlength{\topmargin}{-0.4in}
+\setlength{\textheight}{8.5in}
+
+\setlength{\parindent}{0in}
+\setlength{\parskip}{8pt}
+
+\newcommand{\heading}[6]{
+  \renewcommand{\thepage}{#1-\arabic{page}}
+  \noindent
+  \begin{center}
+  \framebox{
+    \vbox{
+      \hbox to 5.78in { \textbf{#2} \hfill #3 }
+      \vspace{4mm}
+      \hbox to 5.78in { {\Large \hfill #6  \hfill} }
+      \vspace{2mm}
+      \hbox to 5.78in { \textit{Instructor: #4 \hfill #5} }
+    }
+  }
+  \end{center}
+  \vspace*{4mm}
+}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{observation}[theorem]{Observation}
+\newtheorem{fact}[theorem]{Fact}
+\newtheorem{assumption}[theorem]{Assumption}
+
+\newenvironment{proof}{\noindent{\bf Proof:} \hspace*{1mm}}{
+	\hspace*{\fill} $\Box$ }
+\newenvironment{proof_of}[1]{\noindent {\bf Proof of #1:}
+	\hspace*{1mm}}{\hspace*{\fill} $\Box$ }
+\newenvironment{proof_claim}{\begin{quotation} \noindent}{
+	\hspace*{\fill} $\diamond$ \end{quotation}}
+	
+\newcommand{\lecture}[4]{\heading{#1}{Probabilistic Proof Systems}{#2}{Alessandro Chiesa}{Scribe: #4}{#3}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PLEASE MODIFY THESE FIELDS AS APPROPRIATE:
+\newcommand{\lecturenum}{PCP1} % lecture number
+\newcommand{\lecturedate}{\today} % date of lecture (e.g., 'March 20, 2010')
+\newcommand{\lecturetitle}{Some Basic Facts about PCPs} % lecture title
+\newcommand{\scribename}{Shuangjun Zhang} % full name of scribe
+% PUT HERE ANY PACKAGES, MACROS, etc., ADDED BY YOU
+%
+\usepackage{graphicx}
+\usepackage{subfigure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\lecture{\lecturenum}{\lecturedate}{\lecturetitle}{\scribename}
+
+\section{Some Special Case}
+\par We wish to understand $\mathcal{PCP}[\epsilon_{c}, \epsilon_{s}, \Sigma, l, q, r, ...]$ in different regimes. Let's start with some special cases to warm up.
+\par Suppose there is no proof ($q = 0$):
+\begin{itemize}
+  \item $\mathcal{PCP}[q=0, r=0] = \mathcal{P}$.
+  \item $\mathcal{PCP}[q=0, r=\mathcal{O}(\log n)] = \mathcal{P}$.
+  \item $\mathcal{PCP}[q=0, r=\text{poly} (n)] = \mathcal{BPP}$.
+\end{itemize}
+
+\par Suppose there is no randomness ($r = 0$):
+\begin{itemize}
+  \item $\mathcal{PCP}[q=\text{poly} (n), r=0] = \mathcal{NP}$.
+\end{itemize}
+
+\par We denote by $\mathcal{PCP}$ the complexity class with no restrictions beyond "V is PPT". This means that $q = \text{poly}(n), r=\text{poly}(n)$ and allow for $l = \text{exp}(n), \left|\Sigma\right| = \text{exp}(n)$.
+
+\section{Upper Bound and Lower Bound on PCPs}
+\begin{theorem}[Upper Bound]
+  $\mathcal{PCP} \subseteq \mathcal{NEXP}$. 
+\end{theorem}
+\begin{lemma}
+  The proof length $l \leq 2^r q$ for non-adaptive verifiers, and $l \leq 2^r \left|\Sigma\right|^q q$ for adaptive verifiers. (in constructions $l$ is usually smaller than these upper bounds)
+\end{lemma}
+\begin{proof}
+  For non-adaptive verifier, there are at most $2^r$ different query sets, and for adaptive one each answer from the proof can lead to a different next query.
+\end{proof}
+
+\begin{lemma}
+  $\mathcal{PCP}[l, r] \subseteq \mathcal{NTIME}((2^r+l) \cdot \text{poly}(n))$.
+\end{lemma}
+\begin{proof}
+  Suppose $(P,V)$ is a $\mathcal{PCP}$ system for $L$ where the $PCP$ verifier users $r$ random bits to query a proof of length $l$. Consider the decider:
+  \begin{itemize}
+    \item $D(x, \pi) :=$ For every $\rho \in \{0,1\}^r$ compute $b_{\rho} := V^{\pi} (x; \rho)$ and output $1$ if and only if $\Sigma_{\rho} b_{\rho}/2^{r} \geq 1 - \epsilon_{c}$
+  \end{itemize}
+  If $x \in  L$, then $\exists \pi$ s.t. $D(x, \pi) = 1$. If $x \notin L$ then $\forall \pi$, $D(x, \pi) = 0$.
+\end{proof}
+\par The upper bound theorem follows from this two lemma.
+\begin{theorem}[Lower Bound]
+  $\mathcal{PSPACE} \subseteq \mathcal{PCP}$
+\end{theorem}
+\begin{proof}
+  We prove $\mathcal{IP} \subseteq \mathcal{PCP}$.
+  \par Suppose that $(P, V)$ is a public-coin IP for L. Consider proofs in this format: $\pi = \{a_{r_1}\}_{r_1} \cup \{a_{r_1, r_2}\}_{r_1, r_2} \cup \{a_{r_1,...,r_k}\}_{r_1,...,r_k}$ The PCP verifier samples $r_1,...,r_k$ and accepts if the IP verifier accepts:
+  $$
+  V(x, a_{r_1}, a_{r_1, r_2},...,a_{r_1,...,r_k}; r_1,...,r_k) \overset{?}{=} 1.
+  $$
+  \begin{itemize}
+    \item Completeness: consider the honest proof 
+    $$\pi = \{P(x,r_1)\}_{r_1} \cup \{P(x,r_1,r_2)\}_{r_1, r_2} \cup \{P(x,r_1,...,r_k)\}_{r_1,...,r_k}.$$
+    \item Soundness: any proof in the above format corresponds to an "unrolled" IP prover.
+  \end{itemize}
+\end{proof}
+\par In summarize, $\mathcal{PSPACE} \subseteq \mathcal{PCP} \subseteq \mathcal{NEXP}$. We will see that $\mathcal{PCP} = \mathcal{NEXP}$ by recycling techniques (arithmetization, sumcheck) and using new ones (Low Degree Testing), we will also see how to "scale down" to get PCPs for $\mathcal{NP}$.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% bibliography goes here
+\bibliographystyle{amsalpha}
+
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -4,7 +4,13 @@
 
 **My personal notes of [CS294: Foundations of Probabilistic Proofs (F2020)](http://people.eecs.berkeley.edu/~alexch/classes/CS294-F2020.html) (Alessandro Chiesa)**
 
+### 1.1. Interactive Proofs
+
 [Lecture 1: IP#1 - Graph Non-Isomorphism & PSPACE Upper Bound](Probabilistic-Proof-Systems/L1-IP1/L1.pdf)
+
+### 1.2 Probabilistic Checkable Proofs
+
+[Some Basic Facts about PCPs](Probabilistic-Proof-Systems/Simple-Fact-About-PCP/PCP1.pdf)
 
 ## 2. Cryptography
 
