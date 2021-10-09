@@ -20,6 +20,10 @@
 
 [Chapter 5: Hash Functions and Application](Cryptography/Ch5-Hash-Functions-and-Application.md)
 
+**My personal notes of [How To Simulate It - A Tutorial on the Simulation Proof Technique](https://eprint.iacr.org/2016/046)(Yehuda Lindell)**
+
+[Simulation Proof Technique](Cryptography/Simulation-Proof-Technique.md)
+
 ## 3. Analysis of Boolean Function
 
 **My personal notes of [Analysis of Boolean Function](https://www.amazon.com/gp/product/1107038324/) (Ryan O'Donnel)**
