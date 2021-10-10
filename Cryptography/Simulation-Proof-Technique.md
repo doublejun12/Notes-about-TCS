@@ -58,7 +58,7 @@ $$
 	Pr[\mathcal{A}(Com(b_1))=b_1 \oplus b] & = \frac{1}{2} \cdot Pr[\mathcal{A}		(Com(0))=b]+\frac{1}{2} \cdot Pr[\mathcal{A}(Com(1))=1 \oplus b]\\
 	& = \frac{1}{2} \cdot Pr[\mathcal{A}(Com(0))=b]+\frac{1}{2} \cdot (1-Pr[\mathcal{A}(Com(1))=b])\\
 	& = \frac{1}{2} + \frac{1}{2} \cdot (Pr[\mathcal{A}(Com(0))=b] - Pr[\mathcal{A}(Com(1))=b])
-\end{align}
+\end{align}
 $$
 Since $Com$ is a perfectly-biding commitment scheme, thus is computationally hiding, so there exists a negligible function $\mu$ such that for every $b \in \{0,1\}$,
 $$
@@ -97,3 +97,21 @@ $$
 $$
 We conclude that the pair $(\hat{b}_1,\hat{r})$ appears in the ideal execution with probability between $2^{-(n+1)} \cdot (1-\mu(n)) $ and $2^{-(n+1)} \cdot (1+\mu(n))$. This is statistically close to the probability that $(\hat{b}_1,\hat{r})$ appears in a real execution.
 
+We now turn to the case that $P_1$ is corrupted. The simulator $\mathcal{S}$ works as follows:
+
+1. $\mathcal{S}$ sends $\lambda$ externally to the trusted party computing $f_{ct}$ and receives back a bit $b$.
+2. $\mathcal{S}$ invokes $\mathcal{A}$ and internally receives the message $c$ that $\mathcal{A}$ sends to $P_2$.
+3. $\mathcal{S}$ internally hands $\mathcal{A}$ the bit $b_2=0$ as if coming from $P_2$, and receives back its reply. Then, $\mathcal{S}$ internally hands $\mathcal{A}$ the bit $b_2=1$ as if coming from $P_2$, and receives back its reply. We have the following case:
+   1. If $\mathcal{A}$ replies with a valid decommitment $(b_1,r)$ such that $Com(b_1;r)=c$ in both iterations, then $\mathcal{S}$ externally sends $continue$ to the trusted party. In addition, $\mathcal{S}$ defines $b
+      _2=b_1 \oplus b$, internally hands $\mathcal{A}$ the bit $b_2$, and outputs whatever $\mathcal{A}$ outputs.
+   2. If $\mathcal{A}$ does not replay with a valid decommitment in either iteration, then $\mathcal{S}$ externally sends $abort_1$ to the trusted party. Then, $\mathcal{S}$ internally hands $\mathcal{A}$ a random bit $b_2$ and outputs whatever $\mathcal{A}$ outputs.
+   3. If $\mathcal{A}$ replies with a valid decommitment $(b_1,r)$ such that $Com(b_1;r) = c$ only when given $b_2$ where $b_1 \oplus b_2 = b$, then $\mathcal{S}$ externally sends $continue$ to the trust party.  Then, $\mathcal{S}$ internally hands $\mathcal{A}$ the bit $b_2=b_1 \oplus b$ and outputs whatever $\mathcal{A}$ outputs.
+   4. If $\mathcal{A}$ replies with a valid decommitment $(b_1,r)$ such that $Com(b_1;r) = c$ only when given $b_2$ where $b_1 \oplus b_2 \neq b$, then $\mathcal{S}$ externally sends $abort_1$ to the trust party.  Then, $\mathcal{S}$ internally hands $\mathcal{A}$ the bit $b_2=b_1 \oplus b \oplus 1$ and outputs whatever $\mathcal{A}$ outputs.
+
+We prove that the output distribution is identical. 
+
+- Case 3.1.  $\mathcal{A}$'s view in a real execution consists of a random bit $b_2$, and the honest $P_2$'s output equals $b = b_1 \oplus b_2$. Since $b_1$ is fully determined by the commitment $c$ before $b_2$ is chosen by $P_2$, it follows that $b$ is uniformly distributed. In contrast, in an ideal execution, the bit $b$ is uniformly chosen. Then, $\mathcal{A}$'s view consists of $b_2 = b_1 \oplus b$ and the honest $P_2$'s output equals $b$. Since $b_1$ is fully determined by the commitment $c$ before any information about $b$ is given to $\mathcal{A}$, it follows that $b_2 = b_1 \oplus b$ is uniformly distributed. In both cases, the bits $b$ and $b_2$ are uniformly distributed under the constraint that $b \oplus b_2 = b_1$. 
+- Case 3.2. $\mathcal{A}$'s view consists of a uniformly distributed bit, exactly like in a real execution. In addition, the honest $P_2$ outputs $\perp$ in both the real and ideal executions.
+- Case 3.3. and 3.4. $\mathcal{A}$ replies with a valid decommitment for exactly one value $\hat{b}_2 \in \{0,1\}$, let $b_1$ be the value committed in the commitment $c$ sent by $\mathcal{A}$. Then, in the real execution, if $P_2$ sends $\hat{b}_2$ then $\mathcal{A}$ replies with a valid decommiment and the honest $P_2$ outputs $b=b_1 \oplus \hat{b}_2$. In contrast, if $P_2$ sends $\hat{b}_2 \oplus 1$, then $\mathcal{A}$ does not reply with a valid decommitment and $P_2$ outputs $\perp$. Consider now the ideal execution. If $b \oplus b_1 = \hat{b}_2$, then $\mathcal{S}$ hands $\mathcal{A}$ the bit $\hat{b}_2$. In this case, $\mathcal{A}$ replies with a valid decommitment and the honest party $P_2$ outputs $b = b_1 \oplus \hat{b}_2$. In contrast, if $b \oplus b_1 = \hat{b}_2 \oplus 1$, then $\mathcal{S}$ hands $\mathcal{A}$ the bit $\hat{b} \oplus 1$. In this case, $\mathcal{A}$ does not replay with a valid decommitment and $P_2$ outputs $\perp$.
+
+We see that the distribution over the view of $\mathcal{A}$ and the output of $P_2$ is identical in both cases.
