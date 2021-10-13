@@ -28,6 +28,10 @@
 
 **My personal notes of [Analysis of Boolean Function](https://www.amazon.com/gp/product/1107038324/) (Ryan O'Donnel)**
 
+**My personal notes of [Advances in Boolean Function Analysis Lecture Series](https://simons.berkeley.edu/events/boolean)**
+
+[On the Fourier-Entropy Influence Conjecture](Boolean-Function/Advances-in-Boolean-Function-Analysis-Lecture-Series/On-the-Fourier-Entropy-Influence-Conjecture.pdf)
+
 ## 4. Spectral Graph Theory 
 
 **My personal notes of Spectral Graph Theory (From the course [TCS Toolkits](https://www.diderot.one/courses/28) by Ryan O'Donnel)**
