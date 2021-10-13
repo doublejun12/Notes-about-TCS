@@ -32,6 +32,8 @@ where $|x| = |y|$.
 
 # 2. Determining Output - Coin Tossing
 
+## 2.1. Coin Tossing a Single Bit
+
 **Blum's Coin Tossing of a Single Bit**
 
 - **Security parameter:**  Both parties have security parameter $1^n$
@@ -115,3 +117,102 @@ We prove that the output distribution is identical.
 - Case 3.3. and 3.4. $\mathcal{A}$ replies with a valid decommitment for exactly one value $\hat{b}_2 \in \{0,1\}$, let $b_1$ be the value committed in the commitment $c$ sent by $\mathcal{A}$. Then, in the real execution, if $P_2$ sends $\hat{b}_2$ then $\mathcal{A}$ replies with a valid decommiment and the honest $P_2$ outputs $b=b_1 \oplus \hat{b}_2$. In contrast, if $P_2$ sends $\hat{b}_2 \oplus 1$, then $\mathcal{A}$ does not reply with a valid decommitment and $P_2$ outputs $\perp$. Consider now the ideal execution. If $b \oplus b_1 = \hat{b}_2$, then $\mathcal{S}$ hands $\mathcal{A}$ the bit $\hat{b}_2$. In this case, $\mathcal{A}$ replies with a valid decommitment and the honest party $P_2$ outputs $b = b_1 \oplus \hat{b}_2$. In contrast, if $b \oplus b_1 = \hat{b}_2 \oplus 1$, then $\mathcal{S}$ hands $\mathcal{A}$ the bit $\hat{b} \oplus 1$. In this case, $\mathcal{A}$ does not replay with a valid decommitment and $P_2$ outputs $\perp$.
 
 We see that the distribution over the view of $\mathcal{A}$ and the output of $P_2$ is identical in both cases.
+
+## 2.2. Securely Tossing Many Coins and the Hybrid Model
+
+**Multiple Coin Tossing**
+
+- **Input:** Both parties have $1^n$ (where $l(n)$ is the number of coins to be tossed).
+
+- **Security parameter: **Both parties have security parameter $1^n$.
+
+- **Hybrid functionalities: **Let $L_1=\{c|\exists (x,r):c=Com(x;r)\}$ be the language of all valid commitment, and let $R_1$ be its  associated $\mathcal{NP}$-relation. Let $L_2=\{(c,x)|\exist r:c=Com(x;r)\}$ be the language of all pairs of commitments and committed values, and let $R_2$ be its associated $\mathcal{NP}$-relation.
+
+  The parties have access to a trusted party that computes the zero-knowledge proof of knowledge functionalities $f_{zk}^{R_1}$ and $f_{zk}^{R_2}$ associated with relations $R_1$ and $R_2$, respectively.
+
+- **The protocol (for tossing $l(n)$ coins):**
+
+1. $P_1$ chooses a random $\rho_1 \in \{0,1\}^{l(n)}$ and a random $r \in \{0,1\}^{poly(n)}$ of length sufficient to commit to $l(n)$ bits, and sends $c=Com(\rho_1;r)$ to $P_2$.
+2. $P_1$ sends $(c,(\rho_1,r))$ to $f_{zk}^{R_1}$.
+3.  Upon receiving $c$, party $P_2$ sends $c$ to $f_{zk}^{R_1}$ and receives back a bit $b$. if $b=0$ then $P_2$ output $\perp$ and halts. Otherwise, it proceeds.
+4. $P_2$ chooses a random $\rho_2 \in \{0,1\}^{l(n)}$ and sends $\rho_2$ to $P_1$.
+5. Upon receiving $\rho_2$, party $P_1$ sends $\rho_1$ to $P_2$ and sends $((c, \rho_1),r)$ to $f_{zk}^{R_2}$. (If $P_2$ does not reply, or replies with an invalid value, then $P_1$ sets $\rho_2=0^{l(n)}$. ) 
+6. Upon receiving $\rho_1$, party $P_2$ sends $(c, \rho_1)$ to $f_{zk}^{R_2}$ and receives back a bit $b$. If $b=0$ then $P_2$ outputs $\perp$ and halts. Otherwise, it outputs $\rho = \rho_1 \oplus \rho_2$.
+7. $P_1$ outputs $\rho=\rho_1 \oplus \rho_2$.
+
+**Theorem:** Assume that $Com$ is a perfectly-binding commitment scheme and let $l$ be a polynomial. Then, this protocol securely computes the functionality $f_{ct}^l(\lambda, \lambda) = (U_{l(n)}, U_{l(n)})$ in the $(f_{zk}^{R_1}, f_{zk}^{R_2})$-hybrid model.
+
+**Proof:** We first consider the case that $P_1$ is corrupted, and then the case that $P_2$ is corrupted.
+
+**$P_1$ corrupted:** Simulator $\mathcal{S}$ works as follows:
+
+1. $\mathcal{S}$ invokes $\mathcal{A}$, and receives the message $c$ that $\mathcal{A}$ sends to $P_2$, and the message $(c',(\rho_1,r))$ that $\mathcal{A}$ sends to $f_{zk}^{R_1}$.
+
+2. If $c' \neq c$ or $c \neq Com(\rho_1;r)$, then $\mathcal{S}$ sends $abort_1$ to the trusted party computing $f_{ct}^l$, simulates $P_2$ aborting, and outputs whatever $\mathcal{A}$ outputs. Otherwise, it proceeds to the next step.
+
+3. $\mathcal{S}$ sends $1^n$ to the external trusted party computing $f_{ct}^l$ and receives back a string $\rho \in \{0,1\}^{l(n)}$.
+
+4. $\mathcal{S}$ sets $\rho_2=\rho \oplus \rho_1$, and internally hands $\rho_2$ to $\mathcal{A}$.
+
+5. $\mathcal{S}$ receives the message $\rho'_1$ that $\mathcal{A}$ sends to $P_2$, and the message $((c'',\rho''_1),r'')$ that $\mathcal{A}$ sends to $f_{zk}^{R_2}$. If $c'' \neq c$ or $\rho'_1 \neq \rho''_1$ or $c \neq Com(\rho''_1;r'')$ then $\mathcal{S}$ sends $abort_1$ to the trusted party computing $f_{ct}^l$, simulates $P_2$ aborting, and outputs whatever $\mathcal{A}$ outputs.
+
+   Otherwise, $\mathcal{S}$ externally sends $continue$ to the trusted party, and outputs whatever $\mathcal{A}$ outputs.
+
+We consider three phases of the execution: (1). $\mathcal{A}$, controlling $P_1$, sends $c$ to $P_2$ and $(c,(\rho_1,r))$ to $f_{zk}^{R_1}$; (2). $P_2$ sends $\rho_2$ to $P_1$; and (3). $\mathcal{A}$ sends $\rho_1$ to $P_2$ and $((c,\rho_1),r)$ to $f_{zk}^{R_2}$.
+
+- Phase 1: Since $\mathcal{A}$ is deterministic and there is no rewinding, the distribution over the first phase is identical in the real and ideal executions. (If these messages cause $P_2$ to output $\perp$, then this is the entire distribution and so is identical.)
+- Phase 2: Assume that the phase 1 messages do not result in $P_2$ outputting $\perp$. Then, we claim that for every triple $(c,\rho_1,r)$ making up the phase 1 messages, the distribution over $\rho_2$ received by $\mathcal{A}$ is identical in the real and ideal executions. In a real execution, the honest $P_2$ chooses $\rho_2 \in \{0,1\}^{l(n)}$ uniformly and independently of $(c, \rho_1,r)$. In contrast, in an ideal execution, $\rho \in \{0,1\}^{l(n)}$ is chosen uniformly and then $\rho_2$ is set to equal $\rho \oplus \rho_1$. Since $\rho$ is chosen independently of $\rho_1$, we have that $\rho_2=\rho_1 \oplus \rho$ is also uniformly distributed in $\{0,1\}^{l(n)}$ and independent of $(c,\rho_1,r)$.
+
+- Phase 3: Assume again that the phase 1 messages do not result in $P_2$ outputting $\perp$. Then, we claim that for every $(c, \rho_1, r, \rho_2)$ making up the phase 1 and 2 messages, it holds that the honest $P_2$ outputs the exact same value in a real execution with $\mathcal{A}$ and in an ideal execution with $\mathcal{S}$. In order to see this, observe that this phase consists only of $\mathcal{A}$ sending $\rho'_1$ to $P_2$ and $((c'',\rho''_1),r'')$ to $f_{zk}^{R_2}$. there are two cases:
+  - $c''=c$ and $\rho'_1=\rho''_1$ and $c=Com(\rho''_1;r'')$: In this case, in a real execution the trusted party computing $f_{zk}^{R_2}$ will send 1 to $P_2$ and in an ideal execution $\mathcal{S}$ will send $continue$ to the trusted party. This holds because both $\mathcal{A}$ and $P_2$ send the same public statement $(c,\rho'_1)$ to $f_{zk}^{R_2}$ and it holds that $c=Com(\rho'_1;r'')$. Now, in a real execution, $P_2$ outputs $\rho'_1 \oplus \rho_2$, whereas in an ideal execution $P_2$ outputs $\rho=\rho_1 \oplus \rho_2$. However, since $c$ is a perfectly-binding commitment scheme, we have that $\rho'_1=\rho_1$. This implies that in this case the honest $P_2$ outputs the same $\rho=\rho_1 \oplus \rho_2$ in  the real and ideal executions.
+  - $c'' \neq c$ or $\rho'_1 \neq \rho''_1$ or $c \neq Com(\rho'';r'')$: In this case, in an ideal execution $\mathcal{S}$ will send $abort_1$ to the trusted party, and the honest $P_2$ will output $\perp$.  In a real execution, in this case, the trusted party computing $f_{zk}^{R_2}$ will send 0 to $P_2$. This is because either $\mathcal{A}$ and $P_2$ send different statements to the trusted party ($(c, \rho'_1)$ versus $(c'', \rho''_1)$) or the witness is incorrect and $c \neq Com(\rho'';r'')$. Thus, the honest $P_2$ in a real protocol execution will also output $\perp$. 
+
+This proves that the overall joint distribution over $\mathcal{A}$'s view and $P_2$' output is identical in the real and ideal executions.
+
+**$P_2$ is corrupted.** Simulator $\mathcal{S}$ works as follows:
+
+1. $\mathcal{S}$ sends $1^n$ to the external trusted party computing $f_{ct}^l$ and receives back a string $\rho \in \{0,1\}^{l(n)}$. $\mathcal{S}$ externally sends $continue$ to the trusted party ($P_1$ always receives output).
+2. $\mathcal{S}$ chooses a random $r \in \{0,1\}^{poly(n)}$ of sufficient length to commit to $l(n)$ bits, and computes $c=Com(0^{l(n)};r)$.
+3. $\mathcal{S}$ internally invokes $\mathcal{A}$ and hands it $c$.
+4. $\mathcal{S}$ receives back some $\rho_2$ from $\mathcal{A}$ (if $\mathcal{A}$ doesn't send a valid $\rho_2$ then $\mathcal{S}$ sets $\rho_2=0^{l(n)}$ as in the real protocol).
+5. $\mathcal{S}$ sets $\rho_1=\rho_2 \oplus \rho$ and internally hands $\mathcal{A}$ the message $\rho_1$ as if coming from $P_1$.
+6. $\mathcal{S}$ receives some pair $(c',\rho'_1)$ from $\mathcal{A}$ as it sends to $f_{zk}^{R_2}$ (as the verifier). If $(c',\rho'_1) \neq (c, \rho_1)$ then $\mathcal{S}$ internally simulates $f_{zk}^{R_2}$ sending 0 to $\mathcal{A}$. Otherwise, $\mathcal{S}$ internally simulates $f_{zk}^{R_2}$ sending 1 to $\mathcal{A}$.
+7. $\mathcal{S}$ outputs whatever $\mathcal{A}$ outputs. 
+
+Let $S'$ work in the same way as $\mathcal{S}$ except that instead of receiving $\rho$ externally from the trusted party, $S'$ chooses $\rho$ by itself (uniformly at random) after receiving $\rho_2$ from $\mathcal{A}$. In addition, the output of the honest party is set to be $\rho$. Stated differently, $S'$ outputs the pair $(\rho,output(\mathcal{A}))$.
+
+Simulator $S'$ works as follows:
+
+1. $\mathcal{S}'$ chooses a random $r \in \{0,1\}^{poly(n)}$ of sufficient length to commit to $l(n)$ bits, and computes $c=Com(0^{l(n)};r)$.
+2. $\mathcal{S}'$ internally invokes $\mathcal{A}$ and hands it $c$.
+3. $\mathcal{S}'$ receives back some $\rho_2$ from $\mathcal{A}$ (if $\mathcal{A}$ doesn't send a valid $\rho_2$ then $\mathcal{S}'$ sets $\rho_2=0^{l(n)}$ as in the real protocol).
+4. $\mathcal{S}'$ chooses $\rho$ uniformly at random, sets $\rho_1=\rho_2 \oplus \rho$ and internally hands $\mathcal{A}$ the message $\rho_1$ as if coming from $P_1$.
+5. $\mathcal{S}'$ receives some pair $(c',\rho'_1)$ from $\mathcal{A}$ as it sends to $f_{zk}^{R_2}$ (as the verifier). If $(c',\rho'_1) \neq (c, \rho_1)$ then $\mathcal{S}'$ internally simulates $f_{zk}^{R_2}$ sending 0 to $\mathcal{A}$. Otherwise, $\mathcal{S}'$ internally simulates $f_{zk}^{R_2}$ sending 1 to $\mathcal{A}$.
+6. $\mathcal{S}'$ outputs $(\rho, output(\mathcal{A}))$. 
+
+It is immediate that
+$$
+\left\{ S'(1^n) \right\}_{n \in \mathbb{N}} \equiv \left\{ IDEAL_{f_{ct}^l, \mathcal{S}} (1^n, 1^n, n) \right\}_{n \in \mathbb{N}}
+$$
+We present $S'$ as a way of proving the indistinguishability of two distribution, and not as a valid simulator.
+
+Now we describe the distinguisher $D$.
+
+$D$ is given a commitment $c$ and (random) string $R$ as input
+
+1. $D$ internally invokes $\mathcal{A}$ and hands it $c$.
+2. $D$ receives back some $\rho_2$ from $\mathcal{A}$ (if $\mathcal{A}$ doesn't send a valid $\rho_2$ then $D$ sets $\rho_2=0^{l(n)}$ as in the real protocol).
+3. $D$ sets $\rho_1 = R$ and $\rho = \rho_1 \oplus \rho_2$, internally hands $\mathcal{A}$ the message $\rho_1$ as if coming from $P_1$.
+4. $D$ receives some pair $(c',\rho'_1)$ from $\mathcal{A}$ as it sends to $f_{zk}^{R_2}$ (as the verifier). If $(c',\rho'_1) \neq (c, \rho_1)$ then $D$ internally simulates $f_{zk}^{R_2}$ sending 0 to $\mathcal{A}$. Otherwise, $D$ internally simulates $f_{zk}^{R_2}$ sending 1 to $\mathcal{A}$.
+5. $D$ outputs $(\rho, output(\mathcal{A}))$. 
+
+- If $D$ receives the commitment $c = Com(0^{l(n)})$ then its output is identical to the output of $S'$. Since $\rho_1$ is random and independent of everything else, $\rho$ is uniformly distributed, exactly as in an execution of $\mathcal{S}'$. The commitment $c$ is also exactly as generated by $\mathcal{S}'$. Thus, the output distribution is identical.
+- If $\mathcal{D}$ receives the commitment $c=Com(\rho_1)$ then its output is identical to the joint output distribution from a real execution. This holds because the commitment from $P_1$ is a commitment to a random $\rho_1$, and the same $\rho_1$ is sent to $\mathcal{A}$ in the last message of the protocol. In addition, the output of the honest party is $\rho_1 \oplus \rho_2$ exactly like in a real execution. Thus, this is just a real execution between an honest $P_1$ and the adversary $\mathcal{A}$.
+
+It follows from the hiding property of the commitment scheme that the output distribution generated by $\mathcal{D}$ are computationally indistinguishable. Thus
+$$
+\left\{ \mathcal{S}'(1^n) \right\}_{n \in \mathbb{N}} \overset{c}{\equiv} \left\{ REAL_{\pi,\mathcal{A}} (1^n,1^n,n)\right\}_{n \in \mathbb{N}}
+$$
+This complete the proof.
+
+# 3. Extracting Inputs - Oblivious Transfer
