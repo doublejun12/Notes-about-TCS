@@ -32,6 +32,8 @@
 
 [On the Fourier-Entropy Influence Conjecture](Boolean-Function/Advances-in-Boolean-Function-Analysis-Lecture-Series/On-the-Fourier-Entropy-Influence-Conjecture.pdf)
 
+[Sensitivity Conjecture and It‘s Applications](Boolean-Function/Advances-in-Boolean-Function-Analysis-Lecture-Series/Sensitivity-Conjecture-and-Its-Applications.pdf)
+
 ## 4. Spectral Graph Theory 
 
 **My personal notes of Spectral Graph Theory (From the course [TCS Toolkits](https://www.diderot.one/courses/28) by Ryan O'Donnel)**
