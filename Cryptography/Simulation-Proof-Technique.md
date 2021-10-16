@@ -216,3 +216,175 @@ $$
 This complete the proof.
 
 # 3. Extracting Inputs - Oblivious Transfer
+
+The simulator must extractor the input from the advesary, send it to the trusted party and receive back the output.
+
+We will study the oblivious transfer functionality defined by $f_{ot}((x_0,x_1), \sigma)=(\lambda, x_{\sigma})$.
+
+**RAND Procedure:** Let $\mathbb{G}$ be a multiplicative group pf prime order $q$. Define
+$$
+RAND(g,x,y,z)=(u,v)=(g^s \cdot y^t, x^s \cdot z^t).
+$$
+where $s,t \leftarrow \mathbb{Z}_q$ are chosen uniformly at random.
+
+**Claim:** Let $g$ be agenerator of $\mathbb{G}$ and let $x,y,z \in \mathbb{G}$. If $(g,x,y,z)$ do not form a Diffie-Hellman tuple (i.e., there does not exist $a \in \mathbb{Z}_q$ such that $y=g^a$ and $z=x^a$), then $RAND(g,x,y,z)$ is uniformly distributed in $\mathbb{G}^2$.
+
+**Oblivious Transfer**
+
+- **Input:** Party $P_1$'s input is a pair $(x_0,x_1)$ and party $P_2$'s input is a bit $\sigma$. We assume for simplicity that $x_0, x_1 \in \mathbb{G}$ where $\mathbb{G}$ is defined in the auxiliary input.
+- **Auxiliary input:** Both parties hold a security parameter $1^n$ and $(\mathbb{G},q,g_0)$, where $\mathbb{G}$ is an efficient representation of a group of prime order $q$ with a generator $g_0$, and $q$ is of length $n$.
+- **Hybrid functionality:** Let $L=\{(\mathbb{G},q,g_0,x,y,z)|\exists a \in \mathbb{Z}_q: y=(g_0)^a \land z=x^a\}$. be the language of all Diffie-Hellman tuple, and let $R_L$ be its associated $\mathcal{NP}$-relation. The parties have access to a trusted party that computes the zero-knowledge proof of knowledge functionlity $f_{zk}^{R_L}$ associated with relation $R_L$.
+- **The protocol:**
+  1. $P_2$ chooses random values $y, \alpha \in \mathbb{Z}_q$ and computes $g_1=(g_0)^y, h_0=(g_0)^\alpha$ and $h_1=(g_1)^{\alpha+1}$ and sends $(g_1,h_0,h_1)$ to $P_1$.
+  2. $P_2$ sends statement $\left( \mathbb{G},q,g_0,g_1,h_0, \frac{h_1}{g_1} \right)$ and witness $\alpha$ to $f_{zk}^{R_L}$.
+  3. $P_1$ sends statement $\left( \mathbb{G},q,g_0,g_1,h_0, \frac{h_1}{g_1} \right)$ to $f_{zk}^{R_L}$ and receives back a bit. If the bit equals 0, then it halts and output $\perp$. Otherwise, it proceeds to the next step.
+  4. $P_2$ chooses a random value $r \in \mathbb{Z}_q$, computes $g=(g_\sigma)^r$ and $h=(h_{\sigma})^r$ and sends $(g,h)$ to $P_1$.
+  5. $P_1$ computes $(u_0, v_0)=RAND(g_0,g,h_0,h)$, and $(u_1,v_1)=RAND(g_1,g,h_1,h)$. $P_1$ sends $P_2$ the values $(u_0,w_0)$ where $w_0=v_0 \cdot x_0$, and $(u_1, w_1)$ where $w_1=v_1 \cdot x_1$.
+  6. $P_2$ computes $x_{\sigma}=w_{\sigma}/(u_{\sigma})^r$.
+  7. $P_1$ outputs $\lambda$ and $P_2$ outputs $x_{\sigma}$.
+
+------
+
+**Theorem:** Assume that the DDH problem is hard in the auxilirary-input group $\mathbb{G}$. Then, the protocol securely computes $f_{ot}$ in the presence of malicious adversaries.
+
+**Correctness: **$w_{\sigma}/(u_{\sigma})^r =(v_{\sigma} \cdot x_{\sigma})/(g_{\sigma}^s \cdot h_{\sigma}^t)^r = (g^s \cdot h^t \cdot x_{\sigma})/(g^s \cdot h^t) = x_{\sigma}$.
+
+------
+
+$P_1$ is corrupted. Simulator $\mathcal{S}$ works as follows:
+
+1. $\mathcal{S}$ internally invokes $\mathcal{A}$ controlling $P_1$. (Assume that $\mathcal{A}$ is deterministic)
+2. $\mathcal{S}$ chooses $y, \alpha \in \mathbb{Z}_q$ and computes $g_1=(g_0)^y$, $h_0=(g_0)^\alpha$, $h_1=(g_1)^\alpha$. (For real protocol, $h_1=(g_1)^{\alpha+1}$.)
+3. $\mathcal{S}$ internally hands $(g_1,h_0,h_1)$ to $\mathcal{A}$.
+4. When $\mathcal{A}$ sends a message intended for $f_{zk}^{R_L}$. If the message equals $(\mathbb{G},q,g_0,g_1,h_0,\frac{h_1}{g_1})$ then $\mathcal{S}$ internally hands $\mathcal{A}$ the bit 1 as if it came from $f_{zk}^{R_L}$. If the message equals anything else, then $\mathcal{S}$ simulates $\mathcal{A}$ receiving 0 from $f_{zk}^{R_L}$.
+5. $\mathcal{S}$ chooses a random value $r \in \mathbb{Z}_q$, computes $g=(g_0)^r$ and $h=(h_0)^r$, and internally sends $(g,h)$ to $\mathcal{A}$. (This is exactly like an honest $P_2$ with input $\sigma=0$.)
+6. When $\mathcal{A}$ sends messages $(u_0,w_0),(u_1,w_1)$ then simulator $\mathcal{S}$ computes $x_0=w_0/(u_0)^r$ and $x_1=w_1/(u_1)^{r \cdot y^{-1} \mod{q}}$. (If the message is not formed correctly, then $\mathcal{S}$ sends $abort_1$ to the trusted party and output whatever $\mathcal{A}$ outputs. Otherwise, it proceeds.)
+7. $\mathcal{S}$ sends $(x_0,x_1)$ to the trusted party computing $f_{ot}$. (Formally, $\mathcal{S}$ receives back output $\lambda$ and then sends $continue$ to the trusted party.)
+8. $\mathcal{S}$ outputs whatever $\mathcal{A}$ outputs, and halts.
+
+Denote the OT protocol by $\pi$, and denote by $\pi'$ a protocol that is the same as $\pi$ except for the two following differences:
+
+1. $P_2$ chooses $y,\alpha \in \mathbb{Z}_q$ and computes $g_1=(g_0)^y$, $h_0=(g_0)^\alpha$ and $h_1=(g_1)^\alpha$ (instead of computing $h_1=(g_1)^{\alpha+1}$.)
+2. $f_{zk}^{R_L}$ is modified so that it sends 1 to $P_1$ if and only if $P_1$ and $P_2$ sends the same statement.
+
+We claim for every non-uniform p.p.t. adversary $\mathcal{A}$ controlling $P_1$:
+$$
+\left\{REAL_{\pi,\mathcal{A}(z)}((x_0,x_1),\sigma,n) \right\}_{x_0,x_1,\sigma,z,n} \overset{c}{\equiv} \left\{ REAL_{\pi',\mathcal{A}(z)}((x_0,x_1),\sigma,n) \right\}_{x_0,x_1,\sigma,z,n}.
+$$
+We make no claim when $P_2$ is corrupted. It is not true when $P_2$ is corrupted.
+
+- There is one difference between $\pi$ and $\pi'$ and this is how $g_1,h_0,h_1$ are chosen.
+
+- The change to $f_{zk}^{R_L}$ is just to ensure that the output is always 1 unless $\mathcal{A}$ sends a different statement. Since $P_2$ is honest, this makes no difference.
+
+We have to show both that the joint distribution over $\mathcal{A}$'s view and $P_2$'s output is indistinguishable in $\pi$ and $\pi'$.
+
+We use the following variant DDH assumption in $\mathbb{G}$.
+
+**Lemma:** For every non-uniform p.p.t. distinguisher $D$ there exists a negligible function $\mu$ s.t.
+$$
+|Pr[D(\mathbb{G},q,g_0,g_1,(g_0)^r,(g_1)^r)=1]-Pr[D(\mathbb{G},q,g_0,g_1,(g_0)^r,(g_1)^{r+1})=1]| \leq \mu(n),
+$$
+Where $|\mathbb{G}|=q$ is a prime, $g_0,g_1$ are random generators, and $r \in \mathbb{Z}_q$ is randomly chosen. 
+
+**Proof of the lemma:** Consider the standard DDH assumption
+$$
+|Pr[D(\mathbb{G},q,g_0,g_1,(g_0)^r,(g_1)^r)=1]-Pr[D(\mathbb{G},q,g_0,g_1,(g_0)^r,(g_1)^{s})=1]| \leq \mu(n),
+$$
+where $r,s \in \mathbb{Z}_q$ are randomly chosen.
+
+We will prove the lemma by proving
+$$
+|Pr[D(\mathbb{G},q,g_0,g_1,(g_0)^r,(g_1)^s)=1]-Pr[D(\mathbb{G},q,g_0,g_1,(g_0)^r,(g_1)^{r+1})=1]| \leq \mu(n),
+$$
+In order to see this, $D'$ receiving $(g_0,g_1,h_0,h_1)$ can run $D$ on $(g_0,g_1,h_0,h_1 \cdot g_1)$.
+
+- If $D'$ received $(g_0,g_1,(g_0)^r,(g_1)^r)$ then it generates $(g_0,g_1,(g_0)^r,(g_1)^{r+1})$.
+- If $D'$ received $(g_0,g_1,(g_0)^r,(g_1)^s)$ then it generates $(g_0,g_1,(g_0)^r,(g_1)^{s+1})$, which is identical to the distribution over $(g_0, g_1,(g_0)^r,(g_1)^s)$.
+
+If $D$ can distinguish  $(g_0,g_1,(g_0)^r,(g_1)^{r+1})$ and $(g_0, g_1,(g_0)^r,(g_1)^s)$ with non-negligible probability, then $D'$ can use $D$ to solve the standard DDH problem.
+
+So, the lemma holds.
+
+Now, we assume, by contradiction, that there exists an adversary $\mathcal{A}$ controlling $P_1$, a distinguisher $D_{\pi}$, a polynomial $p(\cdot)$, and an infinite series of tuples $(\mathbb{G},q,g,x_0,x_1,\sigma,z,n)$ with $|q|=n$ such that
+$$
+\left| Pr[D_{\pi}(REAL_{\pi,\mathcal{A}(z)}((x_0,x_1),\sigma,n))=1]-Pr[D_{\pi}(REAL_{\pi',\mathcal{A}(z)}((x_0,x_1),\sigma,n))=1] \right| \geq \frac{1}{p(n)}.
+$$
+We construct a non-uniform probabilistic-polynomial time distinguisher $D$ who receives input $(\mathbb{G},q,g_0,g_1,h_0,h_1)$, and a tuple $(x_0,x_1,\sigma,z,n)$ on its advice tape, and works as follows:
+
+1. $D$ invokes $\mathcal{A}$ and an honest $P_2$ with security parameter $1^n$, respective inputs $x_0,x_1$ and $\sigma$, and auxiliary input $z$ for $\mathcal{A}$.
+2. $D$ runs the execution between $\mathcal{A}$ and $P_2$ following the instruction of $\pi'$ with one change. Instead of $P_2$ choosing $y,\alpha \in \mathbb{Z}_q$ and generating $g_1,h_0,h_1$, distinguisher $D$ takes these values from its input. Everything else is the same.
+3. $D$ invokes $D_{\pi}$ on the joint output of $\mathcal{A}$ and the honest $P_2$  from this execution, and outputs whatever $D_{\pi}$ outputs.
+
+The only difference between $\pi$ and $\pi'$ is how the values $g_1,h_0,h_1$ are chosen, we have
+$$
+Pr[D(\mathbb{G},q,g_0,g_1,(g_0)^r,(g_1)^r)=1] = Pr[D_{\pi}(REAL_{\pi',\mathcal{A}(z)}((x_0,x_1),\sigma,n))=1]
+$$
+and
+$$
+Pr[D(\mathbb{G},q,g_0,g_1,(g_0)^r,(g_1)^{r+1})=1] = Pr[D_{\pi}(REAL_{\pi,\mathcal{A}(z)}((x_0,x_1),\sigma,n))=1]
+$$
+Thus,
+$$
+|Pr[D(\mathbb{G},q,g_0,g_1,(g_0)^r,(g_1)^r)=1]-Pr[D(\mathbb{G},q,g_0,g_1,(g_0)^r,(g_1)^{r+1})=1]| \geq \frac{1}{p(n)}.
+$$
+in contradiction to the DDH assumption.
+
+Next, we prove that for every $\mathcal{A}$ controlling $P_1$:
+$$
+\left\{ REAL_{\pi',\mathcal{A}}((x_0,x_1),\sigma,n) \right\}_{x_0,x_1,\sigma \in \{0,1\}^{\star};n \in \mathbb{N}} \equiv \left\{ IDEAL_{f_{ot},\mathcal{S}} ((x_0,x_1),\sigma,n) \right\}_{x_0,x_1,\sigma \in \{0,1\}^{\star};n \in \mathbb{N}}
+$$
+There are two differences between the description of $\pi'$ and an ideal execution with $\mathcal{S}$:
+
+1. In an ideal execution, the pair $(g,h)$ in the view of $\mathcal{A}$ is generated by computing $(g_0)^r$ and $(h_0)^r$. In contrast, in $\pi'$, these values are generated by $P_2$ computing $(g_\sigma)^r$ and $(h_{\sigma})^r$.
+2. In an ideal execution, the honest $P_2$'s outputs are determined by the trusted party, based on $(x_0,x_1)$ sent by $\mathcal{S}$ and its input $\sigma$ (unknown to $\mathcal{S}$).  In contrast, in $\pi$, the honest $P_2$'s output is determined by the protocol instructions.
+
+For the first difference, when $\sigma=0$ then this is immediate. 
+
+When $\sigma=1$, $g_1=(g_0)^y$, $h_1=(h_0)^y$. Thus, $(g_0)^r=(g_1)^{r \cdot y^{-1} \mod{q}}$ and $(h_0)^r=(h_1)^{r \cdot y^{-1} \mod{q}}$. The values $r$ and $r \cdot y^{-1} \mod{q}$ are both uniformly distributed. Therefore, $((g_{\sigma})^r,(h_{\sigma})^r)$ as generated in $\pi'$ is identically distributed to $((g_0)^r,(h_0)^r)$ as generated by $\mathcal{S}$ in an ideal execution.
+
+For the second difference, it suffices to show that the values $(x_0,x_1)$ sent by $\mathcal{S}$ to the trust party computing $f_{ot}$ are the exact outputs that $P_2$ receives in $\pi'$ on that transcript. There are two cases:
+
+- $P_2$ in $\pi'$ has input $\sigma=0$: in both $\pi'$ and the ideal execution with $\mathcal{S}$ we have that $g=(g_0)^r$ and $h=(h_0)^r$. 
+
+  - In $\pi'$, party $P_2$ outputs $x_0=w_0/(u_0)^r$. 
+  - In an ideal execution with $\mathcal{S}$, the value $x_0$ is defined by $\mathcal{S}$ to be $w_0/(u_0)^r$. 
+
+  Thus, the value is identical.
+
+- $P_2$ in $\pi'$ has input $\sigma=1$:
+
+  -  In $\pi'$, $(g,h)=((g_1)^r,(h_1)^r)$ for a random $r$, and $P_2$'s output is obtained by computing $x_1=w_1/(u_1)^r$. 
+  - In an ideal execution with $\mathcal{S}$, $(g,h)=((g_0)^r,(h_0)^r)$ for a random $r$. $P_2$'s output is defined by $\mathcal{S}$ to be $w_1/(u_1)^{r \cdot y^{-1} \mod{q}}$.
+
+  Fix the messages $(g_1,h_0,h_1)$ and $(g,h)$ sent by $P_2$ to $\mathcal{A}$ in either $\pi'$ or in an ideal execution with $\mathcal{S}$. In both cases, there exists a unique $y$ such that $g_1=(g_0)^y$ and $h_1=(h_0)^y$. Let $k$ be the unique value such that $g=(g_1)^k$ and $h=(h_1)^k$.
+
+  - In an execution of $\pi'$ the value $k$ is set to equal $r$ as chosen by $P_2$.
+  - In an ideal execution with $\mathcal{S}$, the value $k$ is set to equal $r \cdot y^{-1} \mod{q}$ where $r$ is the value chosen by $\mathcal{S}$.
+
+  In both a real execution of $\pi'$ and an ideal execution with $\mathcal{S}$, party $P_2$'s output is determined by $w_1/(u_1)^k$. Thus, the output is the same in both cases. 
+
+------
+
+$P_2$ is corrupted. The simulator $\mathcal{S}$ works as follows:
+
+1. $\mathcal{S}$ internally invokes $\mathcal{A}$ controlling $P_2$.
+2. $\mathcal{S}$ internally obtains $(g_1,h_0,h_1)$ from $\mathcal{A}$, as it intends to send to $P_1$.
+3. $\mathcal{S}$ internally obtains an input tuple and $\alpha$ from $\mathcal{A}$, as it intends to send to $f_{zk}^{R_L}$.
+4. $\mathcal{S}$ checks that the input tuple equals $(\mathbb{G},q,g_0,g_1,h_0,\frac{h_1}{g_1})$, that $h_0=(g_0)^{\alpha}$ and $\frac{h_1}{g_1}=(g_1)^{\alpha}$. If not, $\mathcal{S}$ externally sends $abort_2$ to the trusted party computing $f_{ot}$, outputs whatever $\mathcal{A}$ outputs, and halts. Else, it preceeds.
+5. $\mathcal{S}$ internally obtains a pair $(g,h)$ from $P_2$. If $h=g^{\alpha}$ then $\mathcal{S}$ sets $\sigma=0$. Otherwise, it sets $\sigma=1$.
+6. $\mathcal{S}$ externally sends $\sigma$ to the trusted party computing $f_{ot}$ and receives back $x_{\sigma}$.
+7. $\mathcal{S}$ computes $(u_{\sigma},v_{\sigma})=RAND(g_{\sigma},g,h_{\sigma},h)$ and $w_{\sigma}=v_{\sigma} \cdot x_{\sigma}$. In addition, $\mathcal{S}$ sets $(u_{1-\sigma},w_{1-\sigma})$ to be independent uniformly distributed in $\mathbb{G}^2$.
+8. $\mathcal{S}$ internally hands $(u_0,w_0),(u_1,w_1)$ to $\mathcal{A}$.
+9. $\mathcal{S}$ outputs whatever $\mathcal{A}$ outputs and halts.
+
+We construct an alternative simulator $\mathcal{S}'$ in an alternative ideal model with a trusted party who sends both of $P_1$'s inputs $x_0,x_1$ to $\mathcal{S}'$ upon receiving $\sigma$. $\mathcal{S}'$ computes $(u_{1-\sigma},w_{1-\sigma})$ by first computing $(u_{1-\sigma},v_{1-\sigma})=RAND(g_{1-\sigma},g,h_{1-\sigma},h)$ and $w_{1-\sigma}=v_{1-\sigma} \cdot x_{1-\sigma}$, instead of choosing them uniformly. 
+
+First, we claim the output distribution of the adversary $\mathcal{S}'$ in the alternative ideal model is identical to the output of the adversary $\mathcal{A}$ in a real execution with an honest $P_1$. Because $\mathcal{S}'$ generates $(u_0,w_0)$ and $(u_1,w_1)$ exactly like an honest $P_1$, using the correct inputs $(x_0,x_1)$. In addition, $\mathcal{S}'$ verifies the validity of $(g_1,h_0,h_1)$ using witness $\alpha$, exactly like $f_{zk}^{R_L}$. Thus, the result is just a real execution of the protocol.
+
+Now, we claim that the output distribution of the adversary $\mathcal{S}'$ in the alternative ideal model is identical to the output of the adversary $\mathcal{S}$ in an ideal execution with $f_{ot}$. We need to argue that the values $(u_{1-\sigma},w_{1-\sigma})$ generated by $\mathcal{S}'$ are independent uniformly distributed values in $\mathbb{G}$.
+
+- $\sigma=0$, by step 5, we have $h=g^\alpha$, and by step $4$, we have $h_1=g_1^{\alpha+1}$. This implies that $(g_1,g,h_1,h)=(g_1,g,(g_1)^{\alpha+1},g^{\alpha})$ which is not a Diffie-Hellman tuple, it follows that $(u_1,v_1)=RAND(g_1,g,h_1,h)$ is uniformly distributed in $\mathbb{G}^2$, so $(u_1,w_1)=(u_1,v_1 \cdot x_1)$ is uniformly distributed. Thus, $(u_1,w_1)$ are identically distributed in the execution with $\mathcal{S}$ and $\mathcal{S}'$.
+- $\sigma=1$, by step 5, we have $h \neq g^{\alpha}$, let $\alpha' \neq \alpha \mod{q}$ s.t. $h=g^{\alpha'}$. By step 4, we have $h_0 = (g_0)^\alpha$ and so $(g_0,g,h_0,h)=(g_0,g,(g_0)^{\alpha},g^{\alpha'})$ where $\alpha' \neq \alpha \mod{q}$. thus, it is not a Diffie-Hellman tuple.  As in the previous claim, $(u_0,w_0)$ is uniformly distributed and so has the same distribution of $\mathcal{S}$. 
+
+This complete the proof.
