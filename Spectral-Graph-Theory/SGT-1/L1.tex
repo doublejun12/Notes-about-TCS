@@ -200,7 +200,7 @@ Now, we have
 \end{proposition}
 \begin{proof}
   \begin{align*}
-    \mathcal{E}[f] =\frac{1}{2} \underset{u \sim v}{\mathbb{E}}\left[(f(\boldsymbol{u})-f(\boldsymbol{v}))^{2}\right] &= \frac{1}{2} \underset{u \sim \pi}{\mathbb{E}}[f(u)^2] + \frac{1}{2} \underset{v \sim \pi}{\mathbb{E}}[f(v)^2] + \underset{u \sim v}{E} [f(u) \cdot f(v)]\\
+    \mathcal{E}[f] =\frac{1}{2} \underset{u \sim v}{\mathbb{E}}\left[(f(\boldsymbol{u})-f(\boldsymbol{v}))^{2}\right] &= \frac{1}{2} \underset{u \sim \pi}{\mathbb{E}}[f(u)^2] + \frac{1}{2} \underset{v \sim \pi}{\mathbb{E}}[f(v)^2] - \underset{u \sim v}{E} [f(u) \cdot f(v)]\\
     & \leq \mathbb{E}[f^2] + \sqrt{\underset{u \sim v}{\mathbb{E}}[f(u)^2]} \cdot \sqrt{\underset{u \sim v}{\mathbb{E}}[f(v)^2]}\\
     &= 2 \mathbb{E}[f^2]
   \end{align*}
